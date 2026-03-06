@@ -5,27 +5,24 @@ function Admin() {
     name: "",
     price: "",
     description: "",
-    image: null,
+    imageUrl: "",
   });
-
-  const [preview, setPreview] = useState(null);
 
   const handleChange = (e) => {
     setProduct({ ...product, [e.target.name]: e.target.value });
-  };
-
-  const handleImage = (e) => {
-    const file = e.target.files[0];
-    setProduct({ ...product, image: file });
-    if (file) {
-      setPreview(URL.createObjectURL(file));
-    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log(product);
     alert("Product added!");
+    // Reset form if needed
+    setProduct({
+      name: "",
+      price: "",
+      description: "",
+      imageUrl: "",
+    });
   };
 
   return (
@@ -41,37 +38,46 @@ function Admin() {
         <input
           type="text"
           name="name"
-          placeholder="Product Name"
+          value={product.name}
           onChange={handleChange}
+          placeholder="Product Name"
           className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          required
         />
 
         <input
           type="number"
           name="price"
-          placeholder="Price"
+          value={product.price}
           onChange={handleChange}
+          placeholder="Price"
           className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          required
         />
 
         <textarea
           name="description"
-          placeholder="Product Description"
+          value={product.description}
           onChange={handleChange}
+          placeholder="Product Description"
           className="border border-gray-300 p-2 rounded h-24 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          required
         />
 
         <input
-          type="file"
-          accept="image/*"
-          onChange={handleImage}
-          className="border border-gray-300 p-2 rounded"
+          type="url"
+          name="imageUrl"
+          value={product.imageUrl}
+          onChange={handleChange}
+          placeholder="Image URL"
+          className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          required
         />
 
-        {preview && (
+        {product.imageUrl && (
           <img
-            src={preview}
-            alt="Preview"
+            src={product.imageUrl}
+            alt="Product Preview"
             className="w-full h-48 object-cover rounded mt-2"
           />
         )}
