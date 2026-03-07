@@ -1,9 +1,8 @@
 import mongoose from "mongoose";
 
-mongoose.connect("mongodb://localhost:27017/billing", {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-}); 
+mongoose.connect("mongodb://localhost:27017/billing")
+  .then(() => console.log("Connected to MongoDB"))
+  .catch((err) => console.error("MongoDB connection error:", err));
 
 const productSchema = new mongoose.Schema({
   name: String,

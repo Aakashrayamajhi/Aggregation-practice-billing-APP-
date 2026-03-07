@@ -5,31 +5,60 @@ function Admin() {
     name: "",
     price: "",
     description: "",
-    imageUrl: "",
   });
+  const [file, setFile] = useState(null);
+  const [preview, setPreview] = useState(null);
+  const [response, setResponse] = useState("");
 
   const handleChange = (e) => {
     setProduct({ ...product, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleFileChange = (e) => {
+    const selectedFile = e.target.files[0];
+    setFile(selectedFile);
+    setPreview(selectedFile ? URL.createObjectURL(selectedFile) : null);
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log(product);
-    alert("Product added!");
-    // Reset form if needed
-    setProduct({
-      name: "",
-      price: "",
-      description: "",
-      imageUrl: "",
-    });
+
+    if (!file) {
+      setResponse("Please select an image.");
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append("name", product.name);
+      formData.append("price", Number(product.price)); // ensure number
+      formData.append("description", product.description);
+      formData.append("image", file);
+
+      const res = await fetch("http://localhost:3000/upload", { // match backend port
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setResponse(data.message || "Product uploaded successfully!");
+        setProduct({ name: "", price: "", description: "" });
+        setFile(null);
+        setPreview(null);
+      } else {
+        setResponse(data.error || "Failed to upload product.");
+      }
+    } catch (error) {
+      console.error("Error uploading product:", error);
+      setResponse("Error uploading product.");
+    }
   };
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col items-center py-10">
-      <h1 className="text-3xl font-bold mb-8 text-gray-800">
-        Admin Product Upload
-      </h1>
+      <h1 className="text-3xl font-bold mb-8 text-gray-800">Admin Product Upload</h1>
 
       <form
         onSubmit={handleSubmit}
@@ -65,18 +94,16 @@ function Admin() {
         />
 
         <input
-          type="url"
-          name="imageUrl"
-          value={product.imageUrl}
-          onChange={handleChange}
-          placeholder="Image URL"
-          className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          type="file"
+          accept="image/*"
+          onChange={handleFileChange}
           required
+          className="border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
         />
 
-        {product.imageUrl && (
+        {preview && (
           <img
-            src={product.imageUrl}
+            src={preview}
             alt="Product Preview"
             className="w-full h-48 object-cover rounded mt-2"
           />
@@ -89,6 +116,8 @@ function Admin() {
           Add Product
         </button>
       </form>
+
+      {response && <h2 className="mt-4 text-green-600">{response}</h2>}
     </div>
   );
 }
