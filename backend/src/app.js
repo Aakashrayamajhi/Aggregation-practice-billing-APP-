@@ -84,7 +84,16 @@ app.post('/bills', async (req, res) => {
       { $group: { _id: "$transactionId", total: { $sum: "$price" } } }
     ]);
 
+    // total number of items in the cart
+    const totalItems = cart.length
+    const totalbanana = await Bill.aggregate([
+      { $match : {transactionId, name : "Banana"}},
+      {$group : { _id : "$transactionId" ,  totalb: {$sum : 1}}}
+    ])
+
     console.log("Total Bill:", totalbill[0]?.total || 0);
+    console.log("Total Items:", totalItems);
+console.log("Aggregation result:", totalbanana[0]?.totalb || 0);
 
     res.json({ message: 'Purchase successful', total: totalbill[0]?.total || 0, bills: createdBills });
 
