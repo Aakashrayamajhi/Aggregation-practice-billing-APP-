@@ -16,7 +16,27 @@ function Product() {
 
 
   const [cart, setCart] = useState([]);
-  
+
+const handlebuy = async () => {
+  try {
+    const transactionId = Date.now().toString(); // one ID for all items
+
+    const res = await fetch("http://localhost:3000/bills", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ cart, transactionId }) // send all items
+    });
+
+    if (!res.ok) throw new Error("Purchase failed");
+
+    const data = await res.json();
+    alert(`Purchase successful! Total: $${data.total}`);
+    setCart([]); // clear cart
+  } catch (err) {
+    console.log(err);
+    alert("Something went wrong. Please try again.");
+  }
+};
 
   const handleBuy = (product) => {
 
@@ -43,6 +63,11 @@ function Product() {
             ))}
           </ul>
         )}
+       <div class="flex justify-end mt-5">
+  <button onClick={handlebuy} class="bg-red-500 text-white font-bold py-1 px-5 rounded-lg shadow-lg hover:bg-red-600 transform hover:scale-105 transition duration-200">
+    Buy
+  </button>
+</div>
       </div>
 
       <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">

@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import multer from 'multer';
 import productmodel from './model/productmodel.js';
 import fs from 'fs';
+import Bill from './model/billmodel.js';
 
 const app = express();
 
@@ -62,5 +63,35 @@ app.get('/products', async (req, res) => {
   }
 });
 
+
+//for billing aggregation
+app.post('/bills', async (req, res) => {
+  try {
+    const { cart, transactionId } = req.body;
+
+    // Insert all items at once
+    const createdBills = await Bill.insertMany(
+      cart.map(item => ({
+        name: item.name,
+        price: item.price,
+        transactionId
+      }))
+    );
+
+    // Calculate total for this transaction
+    const totalbill = await Bill.aggregate([
+      { $match: { transactionId } },
+      { $group: { _id: "$transactionId", total: { $sum: "$price" } } }
+    ]);
+
+    console.log("Total Bill:", totalbill[0]?.total || 0);
+
+    res.json({ message: 'Purchase successful', total: totalbill[0]?.total || 0, bills: createdBills });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to process purchase' });
+  }
+});
 
 export default app;
